@@ -75,24 +75,29 @@ def downloadWikiCategory(name):
     for result in query({'list':'categorymembers','cmtitle':name}):
         content.append(result)
         
-    res = flatten(content)
+    flattened = flatten(content)
     
-    subcats = []
-    doombox = []
-    for stuff in res:        
+    result = dict()
+    #subcats = []
+    #doombox = []
+    for stuff in flattened:        
         if 'Category:' in stuff['title']:
-            subcats.append(downloadWikiCategory(stuff['title']))
-            doombox.append(stuff)
-    print "Subcategories in "+name+": "+str(len(subcats))
-    for result in subcats:
-        res = res + result
+            result[stuff['title']] = downloadWikiCategory(stuff['title'])
+            ##doombox.append(stuff)
+        else:
+            result[stuff['title']] = stuff['pageid']
+    #print "Subcategories in "+name+": "+str(len(subcats))
+    #for result in subcats:
+    #    res = res + result
 
-    for destroyer in doombox:
-        res.remove(destroyer)
+    #for destroyer in doombox:
+    #    res.remove(destroyer)
     
-    return res         
-        
-#test = downloadWikiCategory('Category:Years')
+    return result         
+
+print 'Downloading category'        
+test = downloadWikiCategory('Category:Clones')
+print 'Finished Downloading category' 
 
 def getPage(name):
     response = urllib2.urlopen('http://starwars.wikia.com/api.php?format=json&action=query&titles='+name+'&prop=revisions&rvprop=content')
@@ -120,21 +125,43 @@ def getURL(title):
             result=result+char
     return result
 
-def getPagesWithCanon(category):
+def getCategoryPages(category,downloadedkeys=[],depth=0):   
+    print 'at depth: '+str(depth)    
     canonPages = dict()
     nonCanonPages = dict()
     hasNoCanon = dict()
     for page in category:
-        canonPage = getPage(getURL(page['title']+'/Canon'))
-        if not isMissing(canonPage):
-            canonPages[page['title']]=canonPage
-            nonCanonPages[page['title']]=getPage(getURL(page['title']))
-        else:
-            hasNoCanon[page['title']]=getPage(getURL(page['title']))
+        if not page in downloadedkeys:        
+            if 'Category:' in page:
+                print 'Now downloading '+page             
+                subResult = getCategoryPages(category[page],downloadedkeys,depth+1)
+                canonPages = dict(canonPages,**subResult['Canon'])
+                nonCanonPages = dict(nonCanonPages,**subResult['nonCanon'])
+                hasNoCanon = dict(hasNoCanon,**subResult['hasNoCanon'])
+            else:
+                downloadedkeys.append(page)
+                canonPage = getPage(getURL(page+'/Canon'))
+                if not isMissing(canonPage):
+                    canonPages[page]=canonPage
+                    nonCanonPages[page]=getPage(getURL(page))
+                else:
+                    hasNoCanon[page]=getPage(getURL(page))
     result = dict()
     result['Canon']=canonPages
     result['nonCanon']=nonCanonPages
     result['hasNoCanon']=hasNoCanon
     return result
 
-test2 = getPagesWithCanon(test[1300:])
+#test2 = getPagesWithCanon(test[1300:])
+print 'Downloading pages'
+test2 = getCategoryPages(test)
+
+##Save dat shite
+import unicodedata
+import codecs
+fileObject = codecs.open('CategoryMapData','w','utf-8-sig')
+json.dump(test,fileObject)
+fileObject.close()
+fileObject = codecs.open('PageData','w','utf-8-sig')
+json.dump(test2,fileObject)
+fileObject.close()

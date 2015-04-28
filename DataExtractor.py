@@ -122,7 +122,7 @@ def getURL(title):
             result=result+'_'
         else:
             result=result+char
-    return result
+    return codecs.encode(result,'utf8') ##Encoded to avoid weird char errors
 
 def getCategoryPages(category_dict,downloadedkeys=[],depth=0):     
     canonPages = dict()
@@ -196,10 +196,12 @@ def subdict(data,index_start,index_end):
 ##Root category
 #category_data['Category:Star_Wars']
 
-subdata = subdict(category_data,0,22)
+subdata = subdict(category_data,0,300)
 ##Category 23 "Redirects from alternate spelling" includes SERIOUSLY weird chars
 ##and are useless pages anyway. Leave it aloooone
-page_data = getCategoryPages(subdata)
+##Category 250 "Files without subject categorization" is also useless, large and contains funny symbols
+
+#page_data = getCategoryPages(subdata)
 
 def extractKnownKeys(data_dict):
     result = []
@@ -209,9 +211,9 @@ def extractKnownKeys(data_dict):
         result.append(key)
     return result
 
-fileObject = codecs.open('PageDataFull','w','utf-8-sig')
-json.dump(page_data,fileObject)
-fileObject.close()
+#fileObject = codecs.open('PageDataFull','w','utf-8-sig')
+#json.dump(page_data,fileObject)
+#fileObject.close()
 
 ##Load it again
 fileObject = codecs.open('PageDataFull','r','utf-8-sig')
@@ -231,3 +233,4 @@ knownKeys=extractKnownKeys(page_data)
 page_data2 = getCategoryPages(subdata,knownKeys)
 page_data = mergeResults(page_data,page_data2)
 #####Now rinse and repeat untill all pages have been downloaded (or attempt downloading all at once)
+

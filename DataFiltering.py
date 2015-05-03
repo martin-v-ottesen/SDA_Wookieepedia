@@ -34,15 +34,24 @@ print isFilePage(page_data['hasNoCanon'].values()[6])
 def isRedirectPage(page):
     p=page['query']['pages'].values()[0]
     content = p['revisions'][0]['*']
-    return '#REDIRECT' in content
+    way1 = ('#REDIRECT' in content)
+    way2 = ('#redirect' in content)
+    return way1 or way2
 
 #Disambiguation page filering
 def isDisambiguationPage(page):
     p=page['query']['pages'].values()[0]
     content = p['revisions'][0]['*']
-    return ('{{Disambig}}' in content) or ('{{disambig}}' in content)
+    way1 = ('{{Disambig}}' in content)
+    way2 = ('{{disambig}}' in content)
+    way3 = ('[[Category:Disambiguation pages]]' in content)
+    return way1 or way2 or way3
 
-
+def isStubPage(page):
+    p=page['query']['pages'].values()[0]
+    content = p['revisions'][0]['*']
+    way1 = '{{stub}}' in content
+    return way1
 
 #Searching for other stub page stuff
 for key in page_data['hasNoCanon']:
@@ -52,11 +61,12 @@ for key in page_data['hasNoCanon']:
         continue
     if not 'revisions' in p.keys():
         print 'failing:    '+title
+        print p
         continue
     if isRedirectPage(page_data['hasNoCanon'][key]) or isDisambiguationPage(page_data['hasNoCanon'][key]):     
         continue
     content = p['revisions'][0]['*']
-    if len(content) < 100:
+    if len(content) < 150:
         print title
 
 page_data['hasNoCanon']['File:Heroes']

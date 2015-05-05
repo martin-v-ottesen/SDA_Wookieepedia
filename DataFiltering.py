@@ -40,31 +40,48 @@ def getCharBox(content):
             lines[key]=val
     return lines
    
+def removeExTags(content):
+    subLongRefs = re.sub(r'<ref[^>]*>[^<]*</ref>','',content)
+    return re.sub(r'<ref[^/>]*/>','',subLongRefs)
+
+def handlePicFiles(content):
+    #For now just remove the entire file struct. May wanna extract picture text at some point
+    return re.sub(r'\[\[File:[^\]\]]*\]\]','',content)
+
+def unpackLinks(content):
+    #content = removeExTags(content)
+    subLongLinks = re.sub(r'\[\[[^\||\]]*\|([^\]\]]*)\]\]','\g<1>',content)
+    return re.sub(r'\[\[([^\]\]]*)\]\]','\g<1>',subLongLinks)
+
 #Cleaning the content of unwanted symbols and syntaxing
 def cleanContent(content):
-    tempdict=getCharBox(content)    
-    tempcontent = content    
+    #removing external tags
+    tempcontent = removeExTags(content) 
+    #getting char box data out
+    tempdict=getCharBox(tempcontent)
     for key in tempdict:
         tempcontent += ' '+tempdict[key]
     #Removing tags
     iteration1 = re.sub(r'\{\{[^}]*\}\}','',tempcontent)
     #Removing Boldface syntax    
-    iteration2 = re.sub(r'\'\'\'([^\'\'\']*)\'\'\'','\g<1>',iteration1) 
+    iteration2 = re.sub(r'\'\'\'','',iteration1) 
     #Removing Italic syntax
-    iteration3 = re.sub(r'\'\'([^\'\']*)\'\'','\g<1>',iteration2)
+    iteration3 = re.sub(r'\'\'','',iteration2)
     #Removing Category tags
     iteration4 = re.sub(r'\[\[Category:[^\]\]]*\]\]','',iteration3)
     #Remove subsection syntax
     iteration5 = re.sub(r'==([^==]*)==','\g<1>',iteration4)
-    #Remove "Safe" symbols
-    iteration6 = re.sub(r'\*|"','',iteration5)
+    #Remove picture structs
+    iteration6 = handlePicFiles(iteration5)
     #Unpack internal links
-    iteration7 = re.sub(r'\[\[([^\]\]]*)\]\]','\g<1>',iteration6)
+    iteration7 = unpackLinks(iteration6)
+    #Remove "Safe" symbols
+    iteration8 = re.sub(r'\*|"|&mdash;|,|:',' ',iteration7)
     #remove linespaces
-    iteration8 = re.sub(r'\n',' ',iteration7)
+    iteration9 = re.sub(r'\n',' ',iteration8)
     #remove multiple spaces
-    iteration9 = re.sub(r' +',' ',iteration8)
-    return iteration9
+    iteration10 = re.sub(r' +',' ',iteration9)
+    return iteration10
 
 #Filtering files out
 def isFilePage(page):

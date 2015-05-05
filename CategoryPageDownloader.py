@@ -61,13 +61,15 @@ def getURL(title):
     return codecs.encode(result,'utf8') ##Encoded to avoid weird char errors
 
 #Function for getting the pages of the category
-def getCategoryPages(category_dict,downloadedkeys=[],depth=0):     
+def getCategoryPages(category_dict,downloadedkeys=[],depth=0):         
+    count = 0    
     canonPages = dict()
     nonCanonPages = dict()
     hasNoCanon = dict()
     print len(downloadedkeys)
     for category in category_dict:
-        print category + ' of size ' + str(len(category_dict[category]))
+        count+=1        
+        print 'Nr. '+str(count) +': '+ category + ' ...of size ' + str(len(category_dict[category]))
         Ghostlings = 0        
         for page_dict in category_dict[category]:
             page = page_dict['title']

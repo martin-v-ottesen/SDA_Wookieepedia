@@ -18,7 +18,7 @@ category_data = json.load(fileObject)
 fileObject.close()
 
 #Load page data
-fileObject = codecs.open('PageDataFull','r','utf-8-sig')
+fileObject = codecs.open('PageDataMerge(0-1800_2101-2500)','r','utf-8-sig')
 page_data = json.load(fileObject)
 fileObject.close()
 
@@ -29,12 +29,21 @@ def getContent(page):
    
 #Getting a dict of the character box
 def getCharBox(content):
-    mess = re.findall(r'\{\{Character\n[^\}\}]*\}\}',content)[0]
+    mess = re.findall(r'\{\{Character\n[^\}\}]*\}\}',content)
+    if len(mess)>0:
+        mess=mess[0]
+    else:
+        return ''
     linemess = re.findall(r'\n\|[^\n]*',mess)  
     linemess[-1] = re.sub(r'([^\}\}])\}\}*','\g<1>',linemess[-1])
     lines = dict()
-    for line in linemess:
-        val = line.split('=')[1]        
+    for line in linemess:   
+        val = line.split('=')  
+        if len(val)>1:
+            val=val[1]
+        else:
+            print 'ARGHline:    '+ line[1:]
+            continue
         if(val!=''):
             key = re.findall('\n\|([^=]*)=',line)[0]
             lines[key]=val
@@ -97,7 +106,9 @@ def isRedirectPage(page):
     content = getContent(page)
     way1 = ('#REDIRECT' in content)
     way2 = ('#redirect' in content)
-    return way1 or way2
+    way3 = ('{{Softredirect|' in content)
+    way4 = ('[[Category:Soft redirects]]' in content)
+    return way1 or way2 or way3 or way4
 
 #Disambiguation page filering
 def isDisambiguationPage(page):
@@ -112,7 +123,27 @@ def isStubPage(page):
     way1 = '{{stub}}' in content
     way2 = '{{Stub}}' in content
     way3 = '{{Ship-stub}}' in content
-    return way1 or way2 or way3
+    way4 = '{{Food-stub}}' in content
+    way5 = '{{Creature-stub}}' in content
+    way6 = '{{City-stub}}' in content
+    return way1 or way2 or way3 or way4 or way5 or way6
+    
+def isTemplate(page):
+    p=page['query']['pages']
+    title = p[p.keys()[0]]['title']
+    return 'Template:' in title
+    
+def isUser(page):
+    p=page['query']['pages']
+    title = p[p.keys()[0]]['title']
+    return 'User:' in title
+    
+def isContest(page):
+    p=page['query']['pages']
+    title = p[p.keys()[0]]['title']
+    way1 = 'Wookieepedia Contests talk:' in title
+    way2 = 'Bracket:' in title
+    return way1 or way2
 
 #Searching for other stub page stuff
 checkdict = page_data['hasNoCanon']
@@ -123,8 +154,8 @@ for key in checkdict:
     if isFilePage(checkdict[key]):
         continue
     if not 'revisions' in p.keys():
-        print 'failing:    '+title
-        print p
+        #print 'failing:    '+title
+        #print p
         continue
     if isRedirectPage(checkdict[key]):
         continue
@@ -132,8 +163,14 @@ for key in checkdict:
         continue
     if isStubPage(checkdict[key]):
         continue
+    if isTemplate(checkdict[key]):
+        continue
+    if isUser(checkdict[key]):
+        continue
+    if isContest(checkdict[key]):
+        continue
     content = p['revisions'][0]['*']
-    if len(cleanContent(content)) < 100:
+    if len(cleanContent(content)) < 50:
         print title
     count+=1
 print "Pages after filtering "+str(count)

@@ -69,7 +69,7 @@ def isFilePage(page):
     return 'File:' in title
 
 #Test of function
-print isFilePage(page_data['hasNoCanon'].values()[6])
+# print isFilePage(page_data['hasNoCanon'].values()[6])
 
 #Filtering redirects out
 def isRedirectPage(page):
@@ -210,7 +210,7 @@ def filterdata(inputdict):
         if isStubPage(inputdict[key]):
             continue
         
-        resdict[title]=cleanContent(getContent(inputdict[key]))
+        resdict[key]=cleanContent(getContent(inputdict[key]))
         count+=1
-    print "Pages after filtering "+str(count)
+    # print "Pages after filtering "+str(count)
     return resdict

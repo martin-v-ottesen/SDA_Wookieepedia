@@ -11,6 +11,7 @@ import json
 import requests
 import unicodedata
 import codecs
+import os
 
 #Query function
 def query(request):
@@ -60,39 +61,46 @@ def getURL(title):
             result=result+char
     return codecs.encode(result,'utf8') ##Encoded to avoid weird char errors
 
+
 #Function for getting the pages of the category
-def getCategoryPages(category_dict,downloadedkeys=[],depth=0):         
-    count = 0    
-    canonPages = dict()
-    nonCanonPages = dict()
-    hasNoCanon = dict()
-    print len(downloadedkeys)
-    for category in category_dict:
+def getCategoryPages(pages,category_dict,start,end,depth=0):         
+    downloadedKeys = extractKnownKeys(pages)
+    count = start-1 
+    fileObject = codecs.open('FullPageData(0-'+str(count)+')','w','utf-8-sig')
+    fileObject.close()
+    lastsave = count
+    checkdict = subdict(category_dict,start,end)
+    for category in checkdict:      
         count+=1        
         print 'Nr. '+str(count) +': '+ category + ' ...of size ' + str(len(category_dict[category]))
         Ghostlings = 0        
         for page_dict in category_dict[category]:
             page = page_dict['title']
-            if not page in downloadedkeys:        
+            if not page in downloadedKeys:        
                 if 'Category:' in page:
                     Ghostlings = Ghostlings + 1
                 else:
-                    downloadedkeys.append(page)
+                    downloadedKeys.append(page)
                     canonPage = getPage(getURL(page+'/Canon'))
                     if not isMissing(canonPage):
-                        canonPages[page]=canonPage
-                        nonCanonPages[page]=getPage(getURL(page))
+                        pages['Canon'][page]=canonPage
+                        pages['nonCanon'][page]=getPage(getURL(page))
                     else:
-                        hasNoCanon[page]=getPage(getURL(page))
+                        pages['hasNoCanon'][page]=getPage(getURL(page))
             else:
                 Ghostlings = Ghostlings + 1
         print 'Amount of Ghosting pages: '+str(Ghostlings)
-    result = dict()
-    result['Canon']=canonPages
-    result['nonCanon']=nonCanonPages
-    result['hasNoCanon']=hasNoCanon
-    print len(downloadedkeys)
-    return result
+
+        if Ghostlings < len(category_dict[category]):
+            fileObject = codecs.open('FullPageData(0-'+str(count)+')','w','utf-8-sig')
+            json.dump(page_data,fileObject)
+            fileObject.close()
+            os.remove('FullPageData(0-'+str(lastsave)+')')
+            lastsave = count
+        
+    print len('is Done! congratulations')
+    
+    return True
 
 #Splitter function to get subset of the dict
 def subdict(data,index_start,index_end):
@@ -132,20 +140,21 @@ category_data = json.load(fileObject)
 fileObject.close()
 
 #select a subset of the data to download (this function prints the amount of pages so try running it first)
-subdata = subdict(category_data,0,300)
+#subdata = subdict(category_data,0,300)
 
 #Either load the already downloaded page data or create an empty dict
-fileObject = codecs.open('PageDataFull','r','utf-8-sig')
+fileObject = codecs.open('PageDataMerge','r','utf-8-sig')
 page_data = json.load(fileObject)
 fileObject.close()
 #page_data = dict()
 
 #Download the pages
-knownKeys=extractKnownKeys(page_data)
-page_data2 = getCategoryPages(subdata,knownKeys)
-page_data = mergeResults(page_data,page_data2)
+#knownKeys=extractKnownKeys(page_data)
+#page_data2 = getCategoryPages(subdata,knownKeys)
+#page_data = mergeResults(page_data,page_data2)
+getCategoryPages(page_data,category_data,2500,len(category_data)-1)
 
 #Save the new combined pages
-fileObject = codecs.open('PageDataFull','w','utf-8-sig')
-json.dump(page_data,fileObject)
-fileObject.close()
+#fileObject = codecs.open('newPageData','w','utf-8-sig')
+#json.dump(page_data,fileObject)
+#fileObject.close()

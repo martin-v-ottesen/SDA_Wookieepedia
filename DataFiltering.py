@@ -116,7 +116,9 @@ def isContest(page):
     return way1 or way2
     
 def removeScores(content):
-    return re.sub(r'\W?(\w*)\W?',' \g<1> ',content) 
+    it1 = re.sub(r'[^\w\'-]*(\w+)[^\w\'-]*',' \g<1> ',content) 
+    it2 = re.sub(r'(\w*) ([\'-]) (\w*)','\g<1>\g<2>\g<3>',it1)
+    return re.sub(r'(\w*)\'s','\g<1>',it2)
 
 def removeSingleWordNumbers(content):
     return re.sub(r'\b\d*\b','',content)

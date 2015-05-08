@@ -13,14 +13,14 @@ import codecs
 import re
 
 #Load category data
-fileObject = codecs.open('CategoryMapDataFull','r','utf-8-sig')
-category_data = json.load(fileObject)
-fileObject.close()
+#fileObject = codecs.open('CategoryMapDataFull','r','utf-8-sig')
+#category_data = json.load(fileObject)
+#fileObject.close()
 
 #Load page data
-fileObject = codecs.open('PageDataMerge(0-1800_2101-2500)','r','utf-8-sig')
-page_data = json.load(fileObject)
-fileObject.close()
+#fileObject = codecs.open('PageDataMerge','r','utf-8-sig')
+#page_data = json.load(fileObject)
+#fileObject.close()
 
 #Getting content of page
 def getContent(page):
@@ -61,36 +61,6 @@ def unpackLinks(content):
     #content = removeExTags(content)
     subLongLinks = re.sub(r'\[\[[^\||\]]*\|([^\]\]]*)\]\]','\g<1>',content)
     return re.sub(r'\[\[([^\]\]]*)\]\]','\g<1>',subLongLinks)
-
-#Cleaning the content of unwanted symbols and syntaxing
-def cleanContent(content):
-    #removing external tags
-    tempcontent = removeExTags(content) 
-    #getting char box data out
-    tempdict=getCharBox(tempcontent)
-    for key in tempdict:
-        tempcontent += ' '+tempdict[key]
-    #Removing tags
-    iteration1 = re.sub(r'\{\{[^}]*\}\}','',tempcontent)
-    #Removing Boldface syntax    
-    iteration2 = re.sub(r'\'\'\'','',iteration1) 
-    #Removing Italic syntax
-    iteration3 = re.sub(r'\'\'','',iteration2)
-    #Removing Category tags
-    iteration4 = re.sub(r'\[\[Category:[^\]\]]*\]\]','',iteration3)
-    #Remove subsection syntax
-    iteration5 = re.sub(r'==([^==]*)==','\g<1>',iteration4)
-    #Remove picture structs
-    iteration6 = handlePicFiles(iteration5)
-    #Unpack internal links
-    iteration7 = unpackLinks(iteration6)
-    #Remove "Safe" symbols
-    iteration8 = re.sub(r'\*|"|&mdash;|,|:',' ',iteration7)
-    #remove linespaces
-    iteration9 = re.sub(r'\n',' ',iteration8)
-    #remove multiple spaces
-    iteration10 = re.sub(r' +',' ',iteration9)
-    return iteration10
 
 #Filtering files out
 def isFilePage(page):
@@ -144,33 +114,103 @@ def isContest(page):
     way1 = 'Wookieepedia Contests talk:' in title
     way2 = 'Bracket:' in title
     return way1 or way2
+    
+def removeScores(content):
+    return re.sub(r'\W?(\w*)\W?',' \g<1> ',content) 
+
+def removeSingleWordNumbers(content):
+    return re.sub(r'\b\d*\b','',content)
+
+#Cleaning the content of unwanted symbols and syntaxing
+def cleanContent(content):
+    #removing external tags
+    tempcontent = removeExTags(content) 
+    #getting char box data out
+    tempdict=getCharBox(tempcontent)
+    for key in tempdict:
+        tempcontent += ' '+tempdict[key]
+    #Removing tags
+    iteration1 = re.sub(r'\{\{[^}]*\}\}','',tempcontent)
+    #Removing Boldface syntax    
+    iteration2 = re.sub(r'\'\'\'','',iteration1) 
+    #Removing Italic syntax
+    iteration3 = re.sub(r'\'\'','',iteration2)
+    #Removing Category tags
+    iteration4 = re.sub(r'\[\[Category:[^\]\]]*\]\]','',iteration3)
+    #Remove subsection syntax
+    iteration5 = re.sub(r'==([^==]*)==','\g<1>',iteration4)
+    #Remove picture structs
+    iteration6 = handlePicFiles(iteration5)
+    #Unpack internal links
+    iteration7 = unpackLinks(iteration6)
+    #Remove "Safe" symbols
+    iteration8 = removeScores(iteration7)
+    #Remove singlular numbers
+    iteration9 = removeSingleWordNumbers(iteration8)
+    #remove linespaces
+    iteration10 = re.sub(r'\n',' ',iteration9)
+    #remove multiple spaces
+    iteration11 = re.sub(r' +',' ',iteration10)
+    return iteration11.lower()
+
+
 
 #Searching for other stub page stuff
-checkdict = page_data['hasNoCanon']
-count = 0
-for key in checkdict:
-    p=checkdict[key]['query']['pages'].values()[0]
-    title = p['title']
-    if isFilePage(checkdict[key]):
-        continue
-    if not 'revisions' in p.keys():
-        #print 'failing:    '+title
-        #print p
-        continue
-    if isRedirectPage(checkdict[key]):
-        continue
-    if isDisambiguationPage(checkdict[key]):     
-        continue
-    if isStubPage(checkdict[key]):
-        continue
-    if isTemplate(checkdict[key]):
-        continue
-    if isUser(checkdict[key]):
-        continue
-    if isContest(checkdict[key]):
-        continue
-    content = p['revisions'][0]['*']
-    if len(cleanContent(content)) < 50:
-        print title
-    count+=1
-print "Pages after filtering "+str(count)
+#checkdict = page_data['hasNoCanon']
+#count = 0
+#for key in checkdict:
+#    p=checkdict[key]['query']['pages'].values()[0]
+#    title = p['title']
+#    if isFilePage(checkdict[key]):
+#        continue
+#    if not 'revisions' in p.keys():
+#        #print 'failing:    '+title
+#        #print p
+#        continue
+#    if isRedirectPage(checkdict[key]):
+#        continue
+#    if isDisambiguationPage(checkdict[key]):     
+#        continue
+#    if isStubPage(checkdict[key]):
+#        continue
+#    if isTemplate(checkdict[key]):
+#        continue
+#    if isUser(checkdict[key]):
+#        continue
+#    if isContest(checkdict[key]):
+#        continue   
+#    content = p['revisions'][0]['*']    
+#    if len(cleanContent(content)) < 50:
+#        print title
+#    count+=1
+#print "Pages after filtering "+str(count)
+
+def filterdata(inputdict):
+    resdict=dict()    
+    count = 0
+    for key in inputdict:
+        p=inputdict[key]['query']['pages'].values()[0]
+        title = p['title']
+        if isFilePage(inputdict[key]):
+            continue
+        if isTemplate(inputdict[key]):
+            continue
+        if isUser(inputdict[key]):
+            continue
+        if isContest(inputdict[key]):
+            continue   
+        if not 'revisions' in p.keys():
+            #print 'failing:    '+title
+            #print p
+            continue        
+        if isRedirectPage(inputdict[key]):
+            continue
+        if isDisambiguationPage(inputdict[key]):     
+            continue
+        if isStubPage(inputdict[key]):
+            continue
+        
+        resdict[title]=cleanContent(getContent(inputdict[key]))
+        count+=1
+    print "Pages after filtering "+str(count)
+    return resdict

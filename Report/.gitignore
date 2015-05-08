@@ -1,12 +1,11 @@
 #Latex extensions
 *.pdf
-Introduction.aux
-Thesis.aux
-Thesis.log
-Thesis.out
-Thesis.pdf
-Thesis.synctex.gz
-Thesis.toc
+sigproc-sp.aux
+sigproc-sp.log
+sigproc-sp.out
+sigproc-sp.pdf
+sigproc-sp.synctex.gz
+sigproc-sp.toc
 *.aux
 *.glo
 *.idx

@@ -110,7 +110,9 @@ def isTemplate(page):
 def isUser(page):
     p=page['query']['pages']
     title = p[p.keys()[0]]['title']
-    return 'User:' in title
+    way1 = 'User:' in title
+    way2 = 'User talk:' in title
+    return way1 or way2
     
 def isContest(page):
     p=page['query']['pages']
@@ -119,7 +121,8 @@ def isContest(page):
     way2 = 'Bracket:' in title
     way3 = 'Wookieepedia:' in title
     way4 = 'Forum:' in title
-    return way1 or way2 or way3 or way4
+    way5 = 'Wookieepedia talk:' in title
+    return way1 or way2 or way3 or way4 or way5
     
 def removeScores(content):
     it1 = re.sub(r'[^\w\'-]*(\w+)[^\w\'-]*',' \g<1> ',content) 
@@ -128,6 +131,9 @@ def removeScores(content):
 
 def removeSingleWordNumbers(content):
     return re.sub(r'\b\d*\b','',content)
+    
+def removeHTTPLinks(content):
+    return re.sub(r'\[http://[^\]]*\]','',content)
 
 def removePictureGalleries(content):
     it1 = re.sub(r'\<Gallery\>[^<]*\</Gallery\>','',content)    
@@ -159,19 +165,21 @@ def cleanContent(content):
     iteration5 = removeSubSecSyntaxAndBookEditions(iteration4)
     #Remove picture structs
     iteration6 = handlePicFiles(iteration5)
+    #Remove web links
+    iteration7 = removeHTTPLinks(iteration6)
     #Unpack internal links
-    iteration7 = unpackLinks(iteration6)
+    iteration8 = unpackLinks(iteration7)
     #Remove file galleries
-    iteration8 = removePictureGalleries(iteration7)    
+    iteration9 = removePictureGalleries(iteration8)    
     #Remove "Safe" symbols
-    iteration9 = removeScores(iteration8)
+    iteration10 = removeScores(iteration9)
     #Remove singlular numbers
-    iteration10 = removeSingleWordNumbers(iteration9)
+    iteration11 = removeSingleWordNumbers(iteration10)
     #remove linespaces
-    iteration11 = re.sub(r'\n',' ',iteration10)
+    iteration12 = re.sub(r'\n',' ',iteration11)
     #remove multiple spaces
-    iteration12 = re.sub(r' +',' ',iteration11)
-    return iteration12.lower()
+    iteration13 = re.sub(r' +',' ',iteration12)
+    return iteration13.lower()
 
 
 

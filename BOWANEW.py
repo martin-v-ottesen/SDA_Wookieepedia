@@ -14,10 +14,11 @@ import csv
 import numpy as np
 
 
-fileObject = codecs.open('cleanTestData','r','utf-8-sig')
-clean = json.load(fileObject)
-fileObject.close()
+#fileObject = codecs.open('FullPageData(0-2686)','r','utf-8-sig')
+#clean = json.load(fileObject)
+#fileObject.close()
 
+clean=filterdata(page_data['hasNoCanon'])
 
 ##Setup VAD
 data_array = []
@@ -30,24 +31,30 @@ for row in data_array[1:]:
     word = row[1]
     VAD[word] = [float(row[2])-5,float(row[5])-5,float(row[8])-5]
 
-#Get all words in the dict
+#Get all words in the dict - SLOOOOOOOOW
 def get_words(cleandict):
-    resdict=dict()
-    for key in cleandict:
-        for word in cleandict[key].split(' '):
-            resdict[word]=1
-    return resdict.keys()
+    resarray = []
+    count=0
+    for thing in cleandict.values():
+        count+=1
+        if count%200==0:
+            print count
+        for word in thing.split(' '):
+            if not word in resarray:
+                resarray.append(word)
+    return resarray
 
 vocab = get_words(clean)            
 
 ##Setup Vectorizer
 from sklearn.feature_extraction.text import CountVectorizer
-vectorizer = CountVectorizer(min_df=2)
+vectorizer = CountVectorizer(min_df=1)
 ##remove unwanted words from vocab
+
 
 ##Fit the vocabulary to vectorizer. Only these words (of length at least 2) will be in the array
 X=vectorizer.fit_transform(vocab)
-
+len(vectorizer.get_feature_names())
 ##Checking if append screws over the order of the array
 #check = vectorizer.transform(clean.values()[:100]).toarray()
 #x_bow = vectorizer.transform(clean.values()[:100]).toarray()
@@ -68,15 +75,15 @@ def checkTheSame(bow1,bow2):
 
 
 ###Get true X_BOW
-x_bow = np.int16(vectorizer.transform(clean.values()[:100]).toarray())
-i=100
-while(i<len(clean.values())):
-    print i    
-    i+=100
-    if(i>=len(clean.values())):
-        x_bow = np.append(x_bow,np.int16(vectorizer.transform(clean.values()[i-100:]).toarray()),0)
-    else:
-        x_bow = np.append(x_bow,np.int16(vectorizer.transform(clean.values()[i-100:i]).toarray()),0)
+#x_bow = np.int16(vectorizer.transform(clean2.values()[:100]).toarray())
+#i=100
+#while(i<len(clean2.values())):
+#    print i    
+#    i+=100
+#    if(i>=len(clean2.values())):
+#        x_bow = np.append(x_bow,np.int16(vectorizer.transform(clean2.values()[i-100:]).toarray()),0)
+#    else:
+#        x_bow = np.append(x_bow,np.int16(vectorizer.transform(clean2.values()[i-100:i]).toarray()),0)
         
 
 ###Search for very frequent words - method 1 (when stuf is very many times in the same article)
@@ -111,13 +118,32 @@ foundwords = [u'and', u'sith', u'would', u'force', u'br', u'starkiller', u'color
 foundwords = [u'an', u'and', u'as', u'at', u'be', u'but', u'by', u'color', u'for', u'from', u'had', u'he', u'his', u'in', u'is', u'it', u'jedi', u'not', u'of', u'on', u'republic', u'span', u'star', u'style', u'sup', u'talk', u'that', u'the', u'their', u'they', u'this', u'to', u'utc', u'wars', u'was', u'were', u'with']
 
 ###Search for very frequent words - method 3 (when a word is present in (allmost) all pages)
-sums2 = []
-for line in np.transpose(x_bow):
-    sums2.append(sum(line==0))
+#sums2 = []
+#for line in np.transpose(x_bow):
+#    sums2.append(sum(line==0))
     
-words3 = []    
-for a_sum in sums2:
-    if a_sum > len(x_bow)-100:
-        words3.append(vectorizer.get_feature_names()[sums2.index(a_sum)])
-print words3    
-    
+#words3 = []    
+#for a_sum in sums2:
+#    if a_sum > len(x_bow)-100:
+#        words3.append(vectorizer.get_feature_names()[sums2.index(a_sum)])
+#print words3    
+#x_bow = np.int16(vectorizer.transform(clean2.values()[:100]).toarray())
+#i=100
+#while(i<len(clean.values())):
+#    print i    
+#    i+=100
+#    if(i>=len(clean.values())):
+#        x_bow = np.append(x_bow,np.int16(vectorizer.transform(clean.values()[i-100:]).toarray()),0)
+#    else:
+#        x_bow = np.append(x_bow,np.int16(vectorizer.transform(clean.values()[i-100:i]).toarray()),0)
+#sums2 = []
+#for line in np.transpose(x_bow):
+#    sums2.append(sum(line==0))
+
+for j in vectorizer.get_feature_names()[:100]:
+    i=0 
+    while i < len(clean):
+        if j in clean.values()[i]:
+            print i
+            break
+        i+=1

@@ -29,8 +29,14 @@ def getContent(page):
    
 #Getting a dict of the character box
 def getBox(content):
-    charBooks = re.sub(r'\{\{Book\n','{{Character\n',content)
-    safemess = re.sub(r'(\{\{Character\n[^\{]*)\{\{([^\}]*)\}\}','\g<1>\g<2>',charBooks)
+    charCamps = re.sub(r'\{\{Campaign\n','{{Character\n',content)
+    charLocs = re.sub(r'\{\{Location\n','{{Character\n',charCamps)
+    charMoo = re.sub(r'\{\{MMO\n','{{Character\n',charLocs)
+    charGames = re.sub(r'\{\{Video_game\n','{{Character\n',charMoo)
+    charShips = re.sub(r'\{\{Starship_class\n','{{Character\n',charGames)
+    charShips2 = re.sub(r'\{\{Individual_ship\n','{{Character\n',charShips)
+    charBooks = re.sub(r'\{\{Book\n','{{Character\n',charShips2)
+    safemess = re.sub(r'(\{\{Character\n[^\{}]*)\{\{([^\}]*)\}\}','\g<1>\g<2>',charBooks)
     mess = re.findall(r'\{\{Character\n[^\}\}]*\}\}',safemess)
     if len(mess)>0:
         mess=mess[0]
@@ -48,13 +54,16 @@ def getBox(content):
             continue
         if(val!=''):
             key = re.findall('\n\|([^=]*)=',line)[0]
-            if(key != 'image' and key != 'isbn'):
+            if(key != 'image' and key != 'isbn' and key != 'imageBG'):
                 lines[key]=val
     return [lines,safemess]
    
 def removeExTags(content):
-    subLongRefs = re.sub(r'<ref[^>]*>[^<]*</ref>','',content)
-    return re.sub(r'<ref[^/>]*/>','',subLongRefs)
+    it1 = re.sub(r'<ref[^>]*>.*?</ref>','',content)
+    it2 = re.sub(r'<div[^>]*>.*?</div>','',it1)
+    it3 = re.sub(r'<div[^/>]*/>','',it2)    
+    
+    return re.sub(r'<ref[^/>]*/>','',it3)
 
 def handlePicFiles(content):
     #For now just remove the entire file struct. May wanna extract picture text at some point
@@ -73,6 +82,12 @@ def isFilePage(page):
 
 #Test of function
 # print isFilePage(page_data['hasNoCanon'].values()[6])
+
+#Filtering card games out
+def isCardGame(page):
+    content = getContent(page)
+    return '[[Category:Trading cards]]' in content
+
 
 #Filtering redirects out
 def isRedirectPage(page):
@@ -105,14 +120,17 @@ def isStubPage(page):
 def isTemplate(page):
     p=page['query']['pages']
     title = p[p.keys()[0]]['title']
-    return 'Template:' in title
+    way1 = 'Template:' in title
+    way2 = 'Template talk:' in title
+    return way1 or way2
     
 def isUser(page):
     p=page['query']['pages']
     title = p[p.keys()[0]]['title']
     way1 = 'User:' in title
     way2 = 'User talk:' in title
-    return way1 or way2
+    way3 = 'Talk:' in title
+    return way1 or way2 or way3
     
 def isContest(page):
     p=page['query']['pages']
@@ -136,8 +154,8 @@ def removeHTTPLinks(content):
     return re.sub(r'\[http://[^\]]*\]','',content)
 
 def removePictureGalleries(content):
-    it1 = re.sub(r'\<Gallery\>[^<]*\</Gallery\>','',content)    
-    return re.sub(r'\<gallery\>[^<]*\</gallery\>','',it1) 
+    it1 = re.sub(r'\<Gallery[^<]*\</Gallery\>','',content)    
+    return re.sub(r'\<gallery[^<]*\</gallery\>','',it1) 
 
 def removeSubSecSyntaxAndBookEditions(content):
     it1 = re.sub(r'====*([^===]*)====*','\g<1>',content)
@@ -155,8 +173,8 @@ def cleanContent(content):
     
     #Removing tags
     iteration1 = re.sub(r'\{\{[^}]*\}\}','',boxData[1])
-    #Removing Boldface syntax    
-    iteration2 = re.sub(r'\'\'\'','',iteration1) 
+    #Removing Boldface and italic   
+    iteration2 = re.sub(r'\'\'\'*','',iteration1) 
     #Removing Italic syntax
     iteration3 = re.sub(r'\'\'','',iteration2)
     #Removing Category tags
@@ -230,7 +248,9 @@ def filterdata(inputdict):
         if not 'revisions' in p.keys():
             #print 'failing:    '+title
             #print p
-            continue        
+            continue   
+        if isCardGame(inputdict[key]):
+            continue
         if isRedirectPage(inputdict[key]):
             continue
         if isDisambiguationPage(inputdict[key]):     

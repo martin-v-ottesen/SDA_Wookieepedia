@@ -65,14 +65,15 @@ def getURL(title):
 #Function for getting the pages of the category
 def getCategoryPages(pages,category_dict,start,end,depth=0):         
     downloadedKeys = extractKnownKeys(pages)
-    count = start-1 
-    fileObject = codecs.open('FullPageData(0-'+str(count)+')','w','utf-8-sig')
+    #count = start-1 
+    fileObject = codecs.open('FullPageData(0-'+str(start -1)+')','w','utf-8-sig')
     fileObject.close()
-    lastsave = count
-    checkdict = subdict(category_dict,start,end)
-    for category in checkdict:      
-        count+=1        
-        print 'Nr. '+str(count) +': '+ category + ' ...of size ' + str(len(category_dict[category]))
+    lastsave = start -1
+    #checkdict = subdict(category_dict,start,end)
+    for x in range(start,end):      
+        #count+=1
+        category = category_dict.keys()[x]       
+        print 'Nr. '+str(x) +': '+ category + ' ...of size ' + str(len(category_dict[category]))
         Ghostlings = 0        
         for page_dict in category_dict[category]:
             page = page_dict['title']
@@ -92,11 +93,11 @@ def getCategoryPages(pages,category_dict,start,end,depth=0):
         print 'Amount of Ghosting pages: '+str(Ghostlings)
 
         if Ghostlings < len(category_dict[category]):
-            fileObject = codecs.open('FullPageData(0-'+str(count)+')','w','utf-8-sig')
+            fileObject = codecs.open('FullPageData(0-'+str(x)+')','w','utf-8-sig')
             json.dump(page_data,fileObject)
             fileObject.close()
             os.remove('FullPageData(0-'+str(lastsave)+')')
-            lastsave = count
+            lastsave = x
         
     print len('is Done! congratulations')
     
@@ -143,7 +144,7 @@ fileObject.close()
 #subdata = subdict(category_data,0,300)
 
 #Either load the already downloaded page data or create an empty dict
-fileObject = codecs.open('PageDataMerge','r','utf-8-sig')
+fileObject = codecs.open('FullPageData(0-2590)','r','utf-8-sig')
 page_data = json.load(fileObject)
 fileObject.close()
 #page_data = dict()
@@ -152,7 +153,7 @@ fileObject.close()
 #knownKeys=extractKnownKeys(page_data)
 #page_data2 = getCategoryPages(subdata,knownKeys)
 #page_data = mergeResults(page_data,page_data2)
-getCategoryPages(page_data,category_data,2500,len(category_data)-1)
+getCategoryPages(page_data,category_data,2501,len(category_data)-1)
 
 #Save the new combined pages
 #fileObject = codecs.open('newPageData','w','utf-8-sig')

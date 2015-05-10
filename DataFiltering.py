@@ -130,7 +130,8 @@ def isTemplate(page):
     title = p[p.keys()[0]]['title']
     way1 = 'Template:' in title
     way2 = 'Template talk:' in title
-    return way1 or way2
+    way3 = 'Module:' in title
+    return way1 or way2 or way3
     
 def isUser(page):
     p=page['query']['pages']
@@ -149,6 +150,10 @@ def isContest(page):
     way4 = 'Forum:' in title
     way5 = 'Wookieepedia talk:' in title
     return way1 or way2 or way3 or way4 or way5
+    
+def isSoundtrack(page):
+    content = getContent(page)
+    return '[[Category:Soundtracks]]' in content
     
 def removeScores(content):
     it1 = re.sub(r'[^\w\'-]*(\w+)[^\w\'-]*',' \g<1> ',content) 
@@ -257,6 +262,8 @@ def filterdata(inputdict):
             continue
         if isContest(inputdict[key]):
             continue   
+        if isSoundtrack(inputdict[key]):
+            continue
         if not 'revisions' in p.keys():
             #print 'failing:    '+title
             #print p

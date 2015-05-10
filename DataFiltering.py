@@ -50,13 +50,21 @@ def getBox(content):
         if len(val)>1:
             val=val[1]
         else:
-            print 'ARGHline:    '+ line[1:]
             continue
         if(val!=''):
             key = re.findall('\n\|([^=]*)=',line)[0]
-            if(key != 'image' and key != 'isbn' and key != 'imageBG'):
+            if(isAcceptedBoxLineKey(key)):
                 lines[key]=val
     return [lines,safemess]
+    
+def isAcceptedBoxLineKey(key):
+    way1 = key != 'image'
+    way2 = key != 'isbn' 
+    way3 = key != 'imageBG'
+    way4 = key != 'max accel'
+    way5 = key != 'max speed'
+    way6 = key != 'length'
+    return way1 and way2 and way3 and way4 and way5 and way6
    
 def removeExTags(content):
     it1 = re.sub(r'<ref[^>]*>.*?</ref>','',content)
@@ -110,11 +118,11 @@ def isStubPage(page):
     content = getContent(page)
     way1 = '{{stub}}' in content
     way2 = '{{Stub}}' in content
-    way3 = '{{Ship-stub}}' in content
-    way4 = '{{Food-stub}}' in content
-    way5 = '{{Creature-stub}}' in content
-    way6 = '{{City-stub}}' in content
-    way7 = '{{Book-stub}}' in content
+    way3 = '{{Ship-stub}}' in content or '{{ship-stub}}' in content
+    way4 = '{{Food-stub}}' in content or '{{food-stub}}' in content
+    way5 = '{{Creature-stub}}' in content or '{{creature-stub}}' in content
+    way6 = '{{City-stub}}' in content or '{{city-stub}}' in content
+    way7 = '{{Book-stub}}' in content or '{{book-stub}}' in content
     return way1 or way2 or way3 or way4 or way5 or way6 or way7
     
 def isTemplate(page):

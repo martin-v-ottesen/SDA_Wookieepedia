@@ -211,11 +211,13 @@ def cleanContent(content):
     iteration9 = removeScores(iteration8)
     #Remove singlular numbers
     iteration10 = removeSingleWordNumbers(iteration9)
+    #Remove single character words
+    iteration11 = re.sub(r'\b\w\b','',iteration10)
     #remove linespaces
-    iteration11 = re.sub(r'\n',' ',iteration10)
+    iteration12 = re.sub(r'\n',' ',iteration11)
     #remove multiple spaces
-    iteration12 = re.sub(r' +',' ',iteration11)
-    return iteration12.lower()
+    iteration13 = re.sub(r' +',' ',iteration12)
+    return iteration13[1:].lower()
 
 
 

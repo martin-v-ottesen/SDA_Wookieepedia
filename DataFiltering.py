@@ -160,7 +160,10 @@ def removePictureGalleries(content):
 def removeSubSecSyntaxAndBookEditions(content):
     it1 = re.sub(r'====*([^===]*)====*','\g<1>',content)
     it2 = re.sub(r'==Editions==[^=]*(==[^=]*==)','\g<1>',it1)
-    return re.sub(r'=+([^=]*)=+','\g<1>',it2)
+    it3 = re.sub(r'==Bibliography==[^=]*(==[^=]*==)','\g<1>',it2)
+    return re.sub(r'=+([^=]*)=+','\g<1>',it3)
+
+def removeTags(content)
 
 #Cleaning the content of unwanted symbols and syntaxing
 def cleanContent(content):
@@ -233,7 +236,6 @@ def cleanContent(content):
 
 def filterdata(inputdict):
     resdict=dict()    
-    count = 0
     for key in inputdict:
         p=inputdict[key]['query']['pages'].values()[0]
         title = p['title']
@@ -258,7 +260,12 @@ def filterdata(inputdict):
         if isStubPage(inputdict[key]):
             continue
         
+        resdict[key]=inputdict[key]
+    return resdict
+    
+def cleanData(inputdict):
+    resdict=dict()    
+    for key in inputdict:
         resdict[key]=cleanContent(getContent(inputdict[key]))
-        count+=1
     # print "Pages after filtering "+str(count)
     return resdict

@@ -143,10 +143,12 @@ len(vectorizer.get_feature_names())
 #for line in np.transpose(x_bow):
 #    sums2.append(sum(line==0))
 
-for j in vectorizer.get_feature_names()[:100]:
+for j in vectorizer.get_feature_names()[:50]:
     i=0 
     while i < len(clean):
         if j in clean.values()[i]:
+            print j
+            print clean.keys()[i]            
             print i
             break
         i+=1

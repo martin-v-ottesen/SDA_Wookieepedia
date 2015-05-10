@@ -262,12 +262,12 @@ def filterdata(inputdict):
             continue
         if isContest(inputdict[key]):
             continue   
-        if isSoundtrack(inputdict[key]):
-            continue
         if not 'revisions' in p.keys():
             #print 'failing:    '+title
             #print p
             continue   
+        if isSoundtrack(inputdict[key]):
+            continue        
         if isCardGame(inputdict[key]):
             continue
         if isRedirectPage(inputdict[key]):

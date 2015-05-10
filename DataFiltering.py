@@ -29,7 +29,9 @@ def getContent(page):
    
 #Getting a dict of the character box
 def getBox(content):
-    charSecs = re.sub(r'\{\{Sector\n','{{Character\n',content)
+    charDroids = re.sub(r'\{\{Droid\n','{{Character\n',content)
+    charOrgs = re.sub(r'\{\{Organization\n','{{Character\n',charDroids)
+    charSecs = re.sub(r'\{\{Sector\n','{{Character\n',charOrgs)
     charMags = re.sub(r'\{\{Magazine\n','{{Character\n',charSecs)
     charTele = re.sub(r'\{\{Television_season\n','{{Character\n',charMags)
     charCamps = re.sub(r'\{\{Campaign\n','{{Character\n',charTele)
@@ -67,7 +69,10 @@ def isAcceptedBoxLineKey(key):
     way4 = key != 'max accel'
     way5 = key != 'max speed'
     way6 = key != 'length'
-    return way1 and way2 and way3 and way4 and way5 and way6
+    way7 = key != 'crew'
+    way8 = key != 'passengers'
+    way9 = key != 'width'
+    return way1 and way2 and way3 and way4 and way5 and way6 and way7 and way8 and way9
    
 def removeExTags(content):
     it1 = re.sub(r'<ref[^>]*>.*?</ref>','',content)
@@ -87,7 +92,13 @@ def unpackLinks(content):
 
 def isRealStuffPage(page):
     content = getContent(page)
-    return '{{Eras|real' in content
+    way1 = '{{Eras|real' in content
+    way2 = '{{Eras|new|real' in content
+    return way1 or way2
+    
+def isTimeline(page):
+    content = getContent(page)
+    return '[[Category:Timelines' in content
 
 #Filtering files out
 def isFilePage(page):
@@ -193,6 +204,9 @@ def removeTags(content):
     for i in range(0,10):    
         it1 = re.sub(r'\{\{[^{}]*\}\}','',it1)
     return it1
+    
+def unpackTables(content):
+    return 'OMGARRRRRGH'
 
 #Cleaning the content of unwanted symbols and syntaxing
 def cleanContent(content):

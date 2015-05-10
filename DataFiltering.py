@@ -163,7 +163,11 @@ def removeSubSecSyntaxAndBookEditions(content):
     it3 = re.sub(r'==Bibliography==[^=]*(==[^=]*==)','\g<1>',it2)
     return re.sub(r'=+([^=]*)=+','\g<1>',it3)
 
-def removeTags(content)
+def removeTags(content):
+    it1=content
+    for i in range(0,10):    
+        it1 = re.sub(r'\{\{[^{}]*\}\}','',it1)
+    return it1
 
 #Cleaning the content of unwanted symbols and syntaxing
 def cleanContent(content):
@@ -175,32 +179,30 @@ def cleanContent(content):
         boxData[1] += ' '+boxData[0][key]
     
     #Removing tags
-    iteration1 = re.sub(r'\{\{[^}]*\}\}','',boxData[1])
+    iteration1 = removeTags(boxData[1])
     #Removing Boldface and italic   
     iteration2 = re.sub(r'\'\'\'*','',iteration1) 
-    #Removing Italic syntax
-    iteration3 = re.sub(r'\'\'','',iteration2)
     #Removing Category tags
-    iteration4 = re.sub(r'\[\[Category:[^\]\]]*\]\]','',iteration3)
+    iteration3 = re.sub(r'\[\[Category:[^\]\]]*\]\]','',iteration2)
     #Remove subsection syntax
-    iteration5 = removeSubSecSyntaxAndBookEditions(iteration4)
+    iteration4 = removeSubSecSyntaxAndBookEditions(iteration3)
     #Remove picture structs
-    iteration6 = handlePicFiles(iteration5)
+    iteration5 = handlePicFiles(iteration4)
     #Remove web links
-    iteration7 = removeHTTPLinks(iteration6)
+    iteration6 = removeHTTPLinks(iteration5)
     #Unpack internal links
-    iteration8 = unpackLinks(iteration7)
+    iteration7 = unpackLinks(iteration6)
     #Remove file galleries
-    iteration9 = removePictureGalleries(iteration8)    
+    iteration8 = removePictureGalleries(iteration7)    
     #Remove "Safe" symbols
-    iteration10 = removeScores(iteration9)
+    iteration9 = removeScores(iteration8)
     #Remove singlular numbers
-    iteration11 = removeSingleWordNumbers(iteration10)
+    iteration10 = removeSingleWordNumbers(iteration9)
     #remove linespaces
-    iteration12 = re.sub(r'\n',' ',iteration11)
+    iteration11 = re.sub(r'\n',' ',iteration10)
     #remove multiple spaces
-    iteration13 = re.sub(r' +',' ',iteration12)
-    return iteration13.lower()
+    iteration12 = re.sub(r' +',' ',iteration11)
+    return iteration12.lower()
 
 
 

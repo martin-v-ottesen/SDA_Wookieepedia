@@ -14,9 +14,11 @@ import csv
 import numpy as np
 
 
-fileObject = codecs.open('cleandata','r','utf-8-sig')
+fileObject = codecs.open('CleanPageDataTest(0-4371)','r','utf-8-sig')
 clean = json.load(fileObject)
 fileObject.close()
+data = clean['hasNoCanon']
+data.add(clean['Canon'])
 
 #filtered = filterdata(pages['hasNoCanon'])
 
@@ -39,15 +41,17 @@ def get_words(cleandict):
     count=0
     for thing in cleandict.values():
         count+=1
-        if count%200==0:
-            print count
+        #if count%200==0:
+            #print count
         for word in thing.split(' '):
             resdict[word]=1            
             #if not word in resarray:
             #    resarray.append(word)
     return resdict.keys()
 
-vocab = get_words(clean)            
+vocab = get_words(data)
+vocab
+print len(vocab)            
 
 ##Setup Vectorizer
 from sklearn.feature_extraction.text import CountVectorizer
@@ -57,7 +61,7 @@ vectorizer = CountVectorizer(min_df=1,token_pattern=r'\w[\w|\'|-]+\w')
 
 ##Fit the vocabulary to vectorizer. Only these words (of length at least 2) will be in the array
 X=vectorizer.fit_transform(vocab)
-len(vectorizer.get_feature_names())
+print len(vectorizer.get_feature_names())
 ##Checking if append screws over the order of the array
 #check = vectorizer.transform(clean.values()[:100]).toarray()
 #x_bow = vectorizer.transform(clean.values()[:100]).toarray()
@@ -145,10 +149,10 @@ len(vectorizer.get_feature_names())
 
 for j in vectorizer.get_feature_names()[:50]:
     i=0 
-    while i < len(clean):
-        if j in clean.values()[i]:
+    while i < len(data):
+        if j in data.values()[i]:
             print j
-            print clean.keys()[i]            
+            print data.keys()[i]            
             print i
             break
         i+=1

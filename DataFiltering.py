@@ -29,7 +29,10 @@ def getContent(page):
    
 #Getting a dict of the character box
 def getBox(content):
-    charCamps = re.sub(r'\{\{Campaign\n','{{Character\n',content)
+    charSecs = re.sub(r'\{\{Sector\n','{{Character\n',content)
+    charMags = re.sub(r'\{\{Magazine\n','{{Character\n',charSecs)
+    charTele = re.sub(r'\{\{Television_season\n','{{Character\n',charMags)
+    charCamps = re.sub(r'\{\{Campaign\n','{{Character\n',charTele)
     charLocs = re.sub(r'\{\{Location\n','{{Character\n',charCamps)
     charMoo = re.sub(r'\{\{MMO\n','{{Character\n',charLocs)
     charGames = re.sub(r'\{\{Video_game\n','{{Character\n',charMoo)
@@ -82,6 +85,10 @@ def unpackLinks(content):
     subLongLinks = re.sub(r'\[\[[^\||\]]*\|([^\]\]]*)\]\]','\g<1>',content)
     return re.sub(r'\[\[([^\]\]]*)\]\]','\g<1>',subLongLinks)
 
+def isRealStuffPage(page):
+    content = getContent(page)
+    return '{{Eras|real' in content
+
 #Filtering files out
 def isFilePage(page):
     p=page['query']['pages']
@@ -123,7 +130,8 @@ def isStubPage(page):
     way5 = '{{Creature-stub}}' in content or '{{creature-stub}}' in content
     way6 = '{{City-stub}}' in content or '{{city-stub}}' in content
     way7 = '{{Book-stub}}' in content or '{{book-stub}}' in content
-    return way1 or way2 or way3 or way4 or way5 or way6 or way7
+    way8 = '{{Tech-stub}}' in content or '{{tech-stub}}' in content
+    return way1 or way2 or way3 or way4 or way5 or way6 or way7 or way8
     
 def isTemplate(page):
     p=page['query']['pages']
@@ -154,6 +162,10 @@ def isContest(page):
 def isSoundtrack(page):
     content = getContent(page)
     return '[[Category:Soundtracks]]' in content
+    
+def isWookieContent(page):
+    content = getContent(page)
+    return '[[Category:Wookieepedia in other languages]]' in content
     
 def removeScores(content):
     it1 = re.sub(r'[^\w\'-]*(\w+)[^\w\'-]*',' \g<1> ',content) 
@@ -268,6 +280,8 @@ def filterdata(inputdict):
             #print 'failing:    '+title
             #print p
             continue   
+        if isRealStuffPage(inputdict[key]):
+            continue
         if isSoundtrack(inputdict[key]):
             continue        
         if isCardGame(inputdict[key]):
@@ -277,6 +291,8 @@ def filterdata(inputdict):
         if isDisambiguationPage(inputdict[key]):     
             continue
         if isStubPage(inputdict[key]):
+            continue
+        if isWookieContent(inputdict[key]):
             continue
         
         resdict[key]=inputdict[key]

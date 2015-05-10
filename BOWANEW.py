@@ -14,41 +14,44 @@ import csv
 import numpy as np
 
 
-#fileObject = codecs.open('FullPageData(0-2686)','r','utf-8-sig')
-#clean = json.load(fileObject)
-#fileObject.close()
+fileObject = codecs.open('cleandata','r','utf-8-sig')
+clean = json.load(fileObject)
+fileObject.close()
 
-clean=filterdata(page_data['hasNoCanon'])
+#filtered = filterdata(pages['hasNoCanon'])
+
+#clean=cleanData(filtered)
 
 ##Setup VAD
-data_array = []
-with open('ANEW.csv','r') as csvfile:
-    reader = csv.reader(csvfile, delimiter=',',quotechar='|')
-    for row in reader:
-        data_array.append(row);
-VAD = dict()
-for row in data_array[1:]:
-    word = row[1]
-    VAD[word] = [float(row[2])-5,float(row[5])-5,float(row[8])-5]
+#data_array = []
+#with open('ANEW.csv','r') as csvfile:
+#    reader = csv.reader(csvfile, delimiter=',',quotechar='|')
+#    for row in reader:
+#        data_array.append(row);
+#VAD = dict()
+#for row in data_array[1:]:
+#    word = row[1]
+#    VAD[word] = [float(row[2])-5,float(row[5])-5,float(row[8])-5]
 
 #Get all words in the dict - SLOOOOOOOOW
 def get_words(cleandict):
-    resarray = []
+    resdict = dict()
     count=0
     for thing in cleandict.values():
         count+=1
         if count%200==0:
             print count
         for word in thing.split(' '):
-            if not word in resarray:
-                resarray.append(word)
-    return resarray
+            resdict[word]=1            
+            #if not word in resarray:
+            #    resarray.append(word)
+    return resdict.keys()
 
 vocab = get_words(clean)            
 
 ##Setup Vectorizer
 from sklearn.feature_extraction.text import CountVectorizer
-vectorizer = CountVectorizer(min_df=1)
+vectorizer = CountVectorizer(min_df=1,token_pattern=r'\w[\w|\'|-]+\w')
 ##remove unwanted words from vocab
 
 
@@ -60,11 +63,11 @@ len(vectorizer.get_feature_names())
 #x_bow = vectorizer.transform(clean.values()[:100]).toarray()
 #x_bow = np.append(x_bow,vectorizer.transform(clean.values()[:100]).toarray(),0)
 
-def checkTheSame(bow1,bow2):
-    for j in range(0,len(bow1)):
-        if bow1[j] != bow2[j]:
-            return False
-    return True
+#def checkTheSame(bow1,bow2):
+#    for j in range(0,len(bow1)):
+#        if bow1[j] != bow2[j]:
+#            return False
+#    return True
     
 #for i in range(0,len(check)):
 #    if not checkTheSame(check[i],x_bow[i]):
@@ -102,7 +105,7 @@ def checkTheSame(bow1,bow2):
 #    x_bow[maxline][wordindex]=0    
 #    maxi[maxline]=max(x_bow[maxline])
     
-foundwords = [u'and', u'sith', u'would', u'force', u'br', u'starkiller', u'color', u'skywalker', u'jade', u'december', u'qel', u'horn', u'palpatine', u'as', u'loran', u'cade', u'in', u'miller', u'an', u'wicket', u'antilles', u'shesh', u'style', u'sidious', u'span', u'her', u'their', u'not', u'fel', u'had', u'jedi', u'by', u'jarael', u'to', u'droma', u'sup', u'vong', u'olin', u'td', u'shan', u'was', u'disambiguation', u'stele', u'2007', u'solo', u'from', u'his', u'star', u'that', u'iblis', u'thrawn', u'2005', u'wars', u'but', u'it', u'they', u'tenel', u'kenobi', u'be', u'on', u'with', u'him', u'is', u'he', u'carrick', u'utc', u'ka', u'yuuzhan', u'for', u'bel', u'vader', u'kneesaa', u'of', u'when', u'revan', u'2006', u'she', u'were', u'celchu', u'the', u'squadron', u'you', u'wraiths']
+#foundwords = [u'and', u'sith', u'would', u'force', u'br', u'starkiller', u'color', u'skywalker', u'jade', u'december', u'qel', u'horn', u'palpatine', u'as', u'loran', u'cade', u'in', u'miller', u'an', u'wicket', u'antilles', u'shesh', u'style', u'sidious', u'span', u'her', u'their', u'not', u'fel', u'had', u'jedi', u'by', u'jarael', u'to', u'droma', u'sup', u'vong', u'olin', u'td', u'shan', u'was', u'disambiguation', u'stele', u'2007', u'solo', u'from', u'his', u'star', u'that', u'iblis', u'thrawn', u'2005', u'wars', u'but', u'it', u'they', u'tenel', u'kenobi', u'be', u'on', u'with', u'him', u'is', u'he', u'carrick', u'utc', u'ka', u'yuuzhan', u'for', u'bel', u'vader', u'kneesaa', u'of', u'when', u'revan', u'2006', u'she', u'were', u'celchu', u'the', u'squadron', u'you', u'wraiths']
 
 ###Search for very frequent words - method 2 (when stuff is in the set more than the amount of pages)
 #sums = []
@@ -115,7 +118,7 @@ foundwords = [u'and', u'sith', u'would', u'force', u'br', u'starkiller', u'color
 #        words2.append(vectorizer.get_feature_names()[sums.index(a_sum)])
 #print words2
 
-foundwords = [u'an', u'and', u'as', u'at', u'be', u'but', u'by', u'color', u'for', u'from', u'had', u'he', u'his', u'in', u'is', u'it', u'jedi', u'not', u'of', u'on', u'republic', u'span', u'star', u'style', u'sup', u'talk', u'that', u'the', u'their', u'they', u'this', u'to', u'utc', u'wars', u'was', u'were', u'with']
+#foundwords = [u'an', u'and', u'as', u'at', u'be', u'but', u'by', u'color', u'for', u'from', u'had', u'he', u'his', u'in', u'is', u'it', u'jedi', u'not', u'of', u'on', u'republic', u'span', u'star', u'style', u'sup', u'talk', u'that', u'the', u'their', u'they', u'this', u'to', u'utc', u'wars', u'was', u'were', u'with']
 
 ###Search for very frequent words - method 3 (when a word is present in (allmost) all pages)
 #sums2 = []

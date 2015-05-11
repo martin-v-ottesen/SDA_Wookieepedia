@@ -15,51 +15,54 @@ fileObject = codecs.open('CategoryMapDataFull','r','utf-8-sig')
 categories = json.load(fileObject)
 fileObject.close()
 
-def getFlatCategory(category_key,category_list,used_subs=[]):
-    main_category = category_list[category_key]
-    cat_items = []
+
+cat_items = []
+used_subs=[]
+def getFlatCategory(category_key):
+    main_category = categories[category_key]
+    
     for item in main_category:
-        if not(item['title'] in cat_items) and not(item['title'] in used_subs):          
+        if not(item['title'] in cat_items) and not(item['title'] in used_subs):
             if 'Category:' in item['title']:
                 used_subs.append( item['title'] )
-                sub_res = getFlatCategory(item['title'],category_list,used_subs)
-                cat_items += sub_res[0]
-                used_subs += sub_res[1]
+                getFlatCategory(item['title'])
             else:
                 cat_items.append(item['title'])
     print len(cat_items)
-    return [cat_items,used_subs]
     
     
 ############################CANON
-flatCanon = getFlatCategory('Category:Canon articles',categories)
+getFlatCategory('Category:Canon articles')
 
 fileObject = codecs.open('FlattenedCanon','w','utf-8-sig')
-json.dump(flatCanon,fileObject)
+json.dump(cat_items,fileObject)
 fileObject.close()
 
 ##Removing the array from memory
-flatCanon = 0
+cat_items = []
+used_subs=[]
 
 ############################NON Canon
-flatNonCanon = getFlatCategory('Category:Non-canon articles',categories)
+getFlatCategory('Category:Non-canon articles')
 
 fileObject = codecs.open('FlattenedNonCanon','w','utf-8-sig')
-json.dump(flatNonCanon,fileObject)
+json.dump(cat_items,fileObject)
 fileObject.close()
 
 ##Removing the array from memory
-flatNonCanon = 0
+cat_items = []
+used_subs=[]
 
 ############################LEGENDS
-flatLegends = getFlatCategory('Category:Legends articles',categories)
+getFlatCategory('Category:Legends articles')
 
 fileObject = codecs.open('FlattenedLegends','w','utf-8-sig')
-json.dump(flatLegends,fileObject)
+json.dump(cat_items,fileObject)
 fileObject.close()
 
 ##Removing the array from memory
-flatLegends = 0
+cat_items = []
+used_subs=[]
 
 
-Print 'Hurray for the lord of the flattening!!!'
+print 'Hurray for the lord of the flattening!!!'

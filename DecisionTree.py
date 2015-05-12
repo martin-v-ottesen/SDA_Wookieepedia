@@ -38,18 +38,17 @@ def get_words_array(cleanarray):
     return resdict.keys()
 
 print 'Getting words...'
-vocab = get_words_array(data['Canon'].values()+data['Legends'].values())
+#vocab = get_words_array(data['Canon'].values()+data['Legends'].values())
+fileObject = codecs.open('newVocabulary','r','utf-8-sig')
+vocab = json.load(fileObject)
+fileObject.close()
 
 from sklearn.feature_extraction.text import CountVectorizer
-vectorizer = CountVectorizer(min_df=1,token_pattern=r'\w[\w|\'|-]+\w')
+vectorizer = CountVectorizer(min_df=1,token_pattern=r'\b\w[\w|\'|-]+\w\b')
 
 X=vectorizer.fit_transform(vocab)
 print 'Amount of words in final vocabulary: '+str(len(vectorizer.get_feature_names()))
 vocab = vectorizer.get_feature_names()
-
-fileObject = codecs.open('Vocabulary','w','utf-8-sig')
-json.dump(vocab,fileObject)
-fileObject.close()
 
 ###Getting the x- and y-class
 def getFold(foldnr, K, data):
@@ -121,6 +120,7 @@ for j in range(1,11):
  
 
 print 'Test error for the decision tree: '+str(sum(Training_Errors)/len(Training_Errors))
+
 #print Predict_Y[:10]
 #print data['nonCanon'].keys()[:10]
 ##I got "Lightsaber pike/Canon" predicted as Canon yay!!!

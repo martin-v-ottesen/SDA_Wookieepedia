@@ -30,15 +30,18 @@ fileObject.close()
 CanonSorted = dict()
 LegendSorted = dict()
 nonCanonSorted = dict()
+OthersSorted = dict()
 
 def sortDict(theDict):
     for key in theDict:
         if key in Canon_cat:
             CanonSorted[key] = theDict[key]
-        if key in Non_Canon_cat:
+        elif key in Non_Canon_cat:
             nonCanonSorted[key] = theDict[key]
-        if key in Legends_cat:
+        elif key in Legends_cat:
             LegendSorted[key] = theDict[key]
+        else:
+            OthersSorted[key] = theDict[key]
 
 sortDict(clean['Canon'])
 sortDict(clean['nonCanon'])
@@ -48,6 +51,7 @@ result = dict()
 result['Canon'] = CanonSorted
 result['Legends'] = LegendSorted
 result['nonCanon'] = nonCanonSorted
+result['Others'] = nonCanonSorted
 
 fileObject = codecs.open('SortedCleaned','w','utf-8-sig')
 json.dump(result,fileObject)

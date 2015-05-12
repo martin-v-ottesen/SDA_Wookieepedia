@@ -15,7 +15,7 @@ import csv
 import numpy as np
 
 
-fileObject = codecs.open('Sorted','r','utf-8-sig')
+fileObject = codecs.open('CleanPageData(0-2500)','r','utf-8-sig')
 data = json.load(fileObject)
 fileObject.close()
 
@@ -45,51 +45,82 @@ vectorizer = CountVectorizer(min_df=1,token_pattern=r'\w[\w|\'|-]+\w')
 
 X=vectorizer.fit_transform(vocab)
 print 'Amount of words in final vocabulary: '+str(len(vectorizer.get_feature_names()))
+vocab = vectorizer.get_feature_names()
 
+fileObject = codecs.open('Vocabulary','w','utf-8-sig')
+json.dump(vocab,fileObject)
+fileObject.close()
 
 ###Getting the x- and y-class
-X = data['Canon'].values()+data['Legends'].values()#+clean['hasNoCanon'].values()
-Y = []
-for i in range(0,len(data['Canon'])):
-    Y.append('Canon Page')
-for i in range(0,len(data['Legends'])):
-    Y.append('Legends Page')
-#for i in range(0,len(clean['hasNoCanon'])):
-#    Y.append('Page with no distinction')
+def getFold(foldnr, K, data):
+    L = len(data)    
+    return data[L/K*foldnr*foldnr-1:L/K*foldnr*foldnr]
 
-###Get true X_BOW
-x_bow = np.int16(vectorizer.transform(X[:100]).toarray())
+def getInvFold(foldnr, K, data):
+    L = len(data)    
+    return data[:L/K*foldnr*foldnr-1] + data[L/K*foldnr*foldnr:]
+
+print 'Calculating Canon BOW values'        
+bow_canon = np.int16(vectorizer.transform(data['Canon'].values()[:100]).toarray())
 i=100
-while(i<len(X)):
-    print 'Calculating BOW values up to: ' + str(i)   
+while(i<len(data['Canon'].values())):
     i+=100
-    if(i>=len(X)):
-        x_bow = np.append(x_bow,np.int16(vectorizer.transform(X[i-100:]).toarray()),0)
+    if(i>=len(data['Canon'].values())):
+        bow_canon = np.append(bow_canon,np.int16(vectorizer.transform(data['Canon'].values()[i-100:]).toarray()),0)
     else:
-        x_bow = np.append(x_bow,np.int16(vectorizer.transform(X[i-100:i]).toarray()),0)
+        bow_canon = np.append(bow_canon,np.int16(vectorizer.transform(data['Canon'].values()[i-100:i]).toarray()),0)
 
-##### Decision Tree
-print 'Fitting Tree...'
+print 'Calculating Legends BOW values'        
+bow_legends = np.int16(vectorizer.transform(data['Legends'].values()[:100]).toarray())
+i=100
+while(i<len(data['Legends'].values())):
+    i+=100
+    if(i>=len(data['Legends'].values())):
+        bow_legends = np.append(bow_legends,np.int16(vectorizer.transform(data['Legends'].values()[i-100:]).toarray()),0)
+    else:
+        bow_legends = np.append(bow_legends,np.int16(vectorizer.transform(data['Legends'].values()[i-100:i]).toarray()),0)
+
+Training_Errors = []
 from sklearn import tree
-clf = tree.DecisionTreeClassifier()
-clf = clf.fit(x_bow, Y)
+for j in range(1,11):
+    LFoldCanon = len(getFold(j,10,bow_canon))
+    X_train = getInvFold(j,10,bow_canon) + getInvFold(j,10,bow_legends)
+    X_test = getFold(j,10,bow_canon) + getFold(j,10,bow_legends)
+    LFoldLegends = len(X_test)-LFoldCanon
+    LInvFoldCanon = len(bow_canon) - LFoldCanon
+    LInvFoldLegends = len(bow_legends) - LFoldLegends
 
-#### BOW some stuff
-X_predict = data['nonCanon'].values()
-x_predict = np.int16(vectorizer.transform(X_predict[:100]).toarray())
-i=100
-while(i<len(X_predict)):
-    print 'Calculating BOW values up to: ' + str(i)   
-    i+=100
-    if(i>=len(X_predict)):
-        x_predict = np.append(x_predict,np.int16(vectorizer.transform(X_predict[i-100:]).toarray()),0)
-    else:
-        x_predict = np.append(x_predict,np.int16(vectorizer.transform(X_predict[i-100:i]).toarray()),0)
+    Y_train = []
+    for it in range(0,LInvFoldCanon):
+        Y_train.append('Canon Page')
+    for it in range(0,LInvFoldLegends):
+        Y_train.append('Legends Page')
+    
+    Y_test = []
+    for it in range(0,LFoldCanon):
+        Y_train.append('Canon Page')
+    for it in range(0,LFoldLegends):
+        Y_train.append('Legends Page')
 
-####Deciding for stuff
-print 'Predicting some stuff...'
-Predict_Y = clf.predict(x_predict)
+    ##### Decision Tree
+    print 'Fitting Tree to fold nr... '+str(j)
+    clf = tree.DecisionTreeClassifier()
+    clf = clf.fit(X_train, Y_train)
 
-print Predict_Y[:10]
-print data['nonCanon'].keys()[:10]
+    
+    ####Deciding for stuff
+    print 'Predicting...'
+    Predict_Y = clf.predict(X_test)
+    Train_Error = 0
+    for it in range(0,len(Predict_Y)):
+        if not Predict_Y[it] == Y_test[it]:
+            Train_Error += 1
+    Train_Error = Train_Error/len(Predict_Y)
+    Training_Errors.append(Train_Error)
+    print 'Training error for fold nr: '+str(j)+' =... '+Train_Error
+ 
+
+print 'Test error for the decision tree: '+str(sum(Training_Errors)/len(Training_Errors))
+#print Predict_Y[:10]
+#print data['nonCanon'].keys()[:10]
 ##I got "Lightsaber pike/Canon" predicted as Canon yay!!!

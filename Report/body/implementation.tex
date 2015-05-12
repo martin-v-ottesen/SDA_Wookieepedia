@@ -1,2 +1,25 @@
 %Implementation. How did you go about implementing your idea? Which practical tools did you use?
 \section{Implementation}
+\subsection{Data retrieval}
+We have chosen to do the data retrieval using the category map inherent to the wikia and download the pages on the basis of the single categories cantoning pages, at the same doing a rough sorting into canon, non-canon and has on canon categories.
+
+\subsection{Filtering data}
+The rough dataset contains a loot of page stubs, user-profiles, picture references and other non useful data which we try to filter out with a rough filtering algorithm.
+
+\subsection{Data Sorting}
+The filtered data is sorted into canon, legend, fan fiction and other using the flattened categories data.
+
+\subsection{Network analysis}
+We wanted to create a family tree network graph but the family relations data was not available we therefore ended up making a master \& apprentice network.
+
+\subsection{Data Cleaning - Bag of Words}
+We cleaned the data for tags, boxes, other wiki data, numbers, symbols, short words and frequently used English words to get the raw content. This content was then used to create a vocabulary and a modified Bag of Words matrix.
+
+\subsection{Word count analysis}
+We want to see if the length of the different types of pages differ radically from each-other, and have chosen to do this by word count as well as create a logarithmic histogram to visualize the result 
+
+\subsection{Decision Tree classification}
+Using sentiment analysis and supervised learning in the form of Decision Trees we want to try and classify "new" data and to analyse if the difference between canon and legends is calculable.
+
+\subsection{Multinomial Bayes' classifier}
+On the basis of the modified Bag of Words matrix create a supervised learning regression algorithm to classify "new" data and to analyse if the difference between canon and legends is calculable.

@@ -61,6 +61,7 @@ def getInvFold(foldnr, K, data):
 
 print 'Calculating Canon BOW values'        
 bow_canon = np.int16(vectorizer.transform(data['Canon'].values()[:100]).toarray())
+
 i=100
 while(i<len(data['Canon'].values())):
     i+=100
@@ -121,6 +122,15 @@ for j in range(1,11):
 
 print 'Test error for the decision tree: '+str(sum(Training_Errors)/len(Training_Errors))
 
+print 'Saving BOW data for CANON'
+fileObject = codecs.open('BOW_CANON','w','utf-8-sig')
+json.dump(bow_canon.tolist(),fileObject)
+fileObject.close()
+
+print 'Saving BOW data for LEGENDS'
+fileObject = codecs.open('BOW_LEGENDS','w','utf-8-sig')
+json.dump(bow_legends.tolist(),fileObject)
+fileObject.close()
 #print Predict_Y[:10]
 #print data['nonCanon'].keys()[:10]
 ##I got "Lightsaber pike/Canon" predicted as Canon yay!!!

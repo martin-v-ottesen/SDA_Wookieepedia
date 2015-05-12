@@ -185,6 +185,9 @@ def removeScores(content):
 
 def removeSingleWordNumbers(content):
     return re.sub(r'\b\d*\b','',content)
+
+def removeIterationNumbers(content):
+    return re.sub(r'\b\d+\w\b','',content)
     
 def removeHTTPLinks(content):
     return re.sub(r'\[http://[^\]]*\]','',content)
@@ -239,11 +242,13 @@ def cleanContent(content):
     iteration10 = removeSingleWordNumbers(iteration9)
     #Remove single character words
     iteration11 = re.sub(r'\b\w\b','',iteration10)
+    #Remove count numbers
+    iteration12 = removeIterationNumbers(iteration11)
     #remove linespaces
-    iteration12 = re.sub(r'\n',' ',iteration11)
+    iteration13 = re.sub(r'\n',' ',iteration12)
     #remove multiple spaces
-    iteration13 = re.sub(r' +',' ',iteration12)
-    return iteration13[1:].lower()
+    iteration14 = re.sub(r' +',' ',iteration13)
+    return iteration14[1:].lower()
 
 
 

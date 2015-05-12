@@ -202,6 +202,15 @@ def removeSubSecSyntaxAndBookEditions(content):
     it3 = re.sub(r'==Bibliography==[^=]*(==[^=]*==)','\g<1>',it2)
     return re.sub(r'=+([^=]*)=+','\g<1>',it3)
 
+def clean_stupid_words(text):
+    string = ""
+    words = ['category','the','be','to','of','and','in','that','have','for','it','not','on','with','he','as','you','do','at','this','but','his','by','from','they','we','say','her','she','or','an']
+
+    for w in text.lower().split(" "):
+        if not w in words:
+            string += w+" "
+    return string
+
 def removeTags(content):
     it1=content
     for i in range(0,10):    
@@ -248,7 +257,8 @@ def cleanContent(content):
     iteration13 = re.sub(r'\n',' ',iteration12)
     #remove multiple spaces
     iteration14 = re.sub(r' +',' ',iteration13)
-    return iteration14[1:].lower()
+
+    return clean_stupid_words(iteration14[1:].lower()) 
 
 
 

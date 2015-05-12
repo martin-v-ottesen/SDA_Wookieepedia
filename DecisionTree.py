@@ -15,13 +15,13 @@ import csv
 import numpy as np
 
 
-fileObject = codecs.open('CleanPageDataTest(0-2500)','r','utf-8-sig')
-clean = json.load(fileObject)
+fileObject = codecs.open('Sorted','r','utf-8-sig')
+data = json.load(fileObject)
 fileObject.close()
 
-fileObject = codecs.open('FilteredPageDataTest(0-2500)','r','utf-8-sig')
-filtered = json.load(fileObject)
-fileObject.close()
+#fileObject = codecs.open('FilteredPageDataTest(0-2500)','r','utf-8-sig')
+#filtered = json.load(fileObject)
+#fileObject.close()
 
 def get_words(cleandict):
     resdict = dict()
@@ -38,7 +38,7 @@ def get_words_array(cleanarray):
     return resdict.keys()
 
 print 'Getting words...'
-vocab = get_words_array(clean['Canon'].values()+clean['nonCanon'].values())
+vocab = get_words_array(data['Canon'].values()+data['Legends'].values())
 
 from sklearn.feature_extraction.text import CountVectorizer
 vectorizer = CountVectorizer(min_df=1,token_pattern=r'\w[\w|\'|-]+\w')
@@ -48,12 +48,12 @@ print 'Amount of words in final vocabulary: '+str(len(vectorizer.get_feature_nam
 
 
 ###Getting the x- and y-class
-X = clean['Canon'].values()+clean['nonCanon'].values()#+clean['hasNoCanon'].values()
+X = data['Canon'].values()+data['Legends'].values()#+clean['hasNoCanon'].values()
 Y = []
-for i in range(0,len(clean['Canon'])):
+for i in range(0,len(data['Canon'])):
     Y.append('Canon Page')
-for i in range(0,len(clean['nonCanon'])):
-    Y.append('Non Canon Page')
+for i in range(0,len(data['Legends'])):
+    Y.append('Legends Page')
 #for i in range(0,len(clean['hasNoCanon'])):
 #    Y.append('Page with no distinction')
 
@@ -75,7 +75,7 @@ clf = tree.DecisionTreeClassifier()
 clf = clf.fit(x_bow, Y)
 
 #### BOW some stuff
-X_predict = clean['hasNoCanon'].values()
+X_predict = data['nonCanon'].values()
 x_predict = np.int16(vectorizer.transform(X_predict[:100]).toarray())
 i=100
 while(i<len(X_predict)):
@@ -91,5 +91,5 @@ print 'Predicting some stuff...'
 Predict_Y = clf.predict(x_predict)
 
 print Predict_Y[:10]
-print clean['hasNoCanon'].keys()[:10]
+print data['nonCanon'].keys()[:10]
 ##I got "Lightsaber pike/Canon" predicted as Canon yay!!!

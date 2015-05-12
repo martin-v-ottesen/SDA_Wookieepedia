@@ -83,8 +83,8 @@ Training_Errors = []
 from sklearn import tree
 for j in range(1,11):
     LFoldCanon = len(getFold(j,10,bow_canon))
-    X_train = getInvFold(j,10,bow_canon) + getInvFold(j,10,bow_legends)
-    X_test = getFold(j,10,bow_canon) + getFold(j,10,bow_legends)
+    X_train = np.append( getInvFold(j,10,bow_canon) , getInvFold(j,10,bow_legends) ,0)
+    X_test = np.append( getFold(j,10,bow_canon) , getFold(j,10,bow_legends), 0)
     LFoldLegends = len(X_test)-LFoldCanon
     LInvFoldCanon = len(bow_canon) - LFoldCanon
     LInvFoldLegends = len(bow_legends) - LFoldLegends

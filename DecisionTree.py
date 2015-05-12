@@ -57,7 +57,7 @@ def getFold(foldnr, K, data):
 
 def getInvFold(foldnr, K, data):
     L = len(data)    
-    return data[:L/K*foldnr*foldnr-1] + data[L/K*foldnr*foldnr:]
+    return np.append(data[:L/K*foldnr*foldnr-1] , data[L/K*foldnr*foldnr:],0)
 
 print 'Calculating Canon BOW values'        
 bow_canon = np.int16(vectorizer.transform(data['Canon'].values()[:100]).toarray())
